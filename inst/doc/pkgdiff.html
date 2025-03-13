@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>pkgdiff</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">pkgdiff</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(pkgdiff)</span></code></pre></div>
+<p>The purpose of <strong>pkgdiff</strong> is to identify changes
+between package versions, with the aim of assessing package stability.
+Here is a list of the major functions in <strong>pkgdiff</strong>, and a
+short explanation of each:</p>
+<ul>
+<li><code>pkg_info()</code>: Displays general information about a
+package, including the description, maintainer, and number of downloads
+in the last month.</li>
+<li><code>pkg_versions()</code>: Returns a data frame of all versions of
+a package.</li>
+<li><code>pkg_diff()</code>: Compares two versions of a package, and
+shows which functions and parameters have been added or removed.</li>
+<li><code>pkg_stability()</code>: Looks at the history of a package,
+identifies breaking changes, and assesses the package for
+stability.</li>
+<li><code>pkg_repo()</code>: Generates a table of the packages in a
+repository and their versions.</li>
+<li><code>repo_breakages()</code>: Looks at a package repository and
+tries to identify which packages will break when upgraded.</li>
+<li><code>repo_stability()</code>: Looks at a package repository and
+calculates a stability score for each package.</li>
+</ul>
+<p>Below is a further elaboration and demo for each of the above
+functions.</p>
+<div id="general-package-information" class="section level2">
+<h2>General Package Information</h2>
+<p>The first thing you may want to do when exploring a package is to get
+some general information about it. General information about a package
+can be achieved using the <code>pkg_info()</code> function. All you need
+to pass is the package name. The function will then return basic
+information such as the maintainer, description, and imported packages.
+Here is a simple demonstration:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="co"># Examine tidymodels package</span></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="fu">pkg_info</span>(<span class="st">&quot;tidymodels&quot;</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># # A package info object: tidymodels package</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co"># - Version: v1.2.0</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co"># - Release Date: 2024-03-25</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co"># - Title: Easily Install and Load the &#39;Tidymodels&#39; Packages</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co"># - Maintainer: Max Kuhn &lt;max@posit.co&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co"># - License: MIT + file LICENSE</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># - Description: The tidy modeling &quot;verse&quot; is a collection of packages for</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co"># modeling and statistical analysis that share the underlying design</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co"># philosophy, grammar, and data structures of the tidyverse.</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co"># - Depends: R (&gt;= 3.6)</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co"># - Imports: broom (&gt;= 1.0.5), cli (&gt;= 3.6.2), conflicted (&gt;= 1.2.0), </span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co"># dials (&gt;= 1.2.1), dplyr (&gt;= 1.1.4), ggplot2 (&gt;= 3.5.0), hardhat (&gt;= 1.3.1), </span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co"># infer (&gt;= 1.0.6), modeldata (&gt;= 1.3.0), parsnip (&gt;= 1.2.1), purrr (&gt;= 1.0.2), </span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co"># recipes (&gt;= 1.0.10), rlang (&gt;= 1.1.3), rsample (&gt;= 1.2.1), rstudioapi (&gt;= 0.16.0), </span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co"># tibble (&gt;= 3.2.1), tidyr (&gt;= 1.3.1), tune (&gt;= 1.2.0), workflows (&gt;= 1.1.4), </span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co"># workflowsets (&gt;= 1.1.0), yardstick (&gt;= 1.3.1)</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co"># - Suggests: covr, glue, knitr, rmarkdown, testthat (&gt;= 3.0.0), xml2</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co"># - Repository: CRAN</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co"># - Cached: TRUE</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co"># - Functions: 9</span></span></code></pre></div>
+<p>The return value of this function is actually an object that can be
+manipulated programmatically. Here we will extract some of the data
+values from this object:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="co"># Capture package info object</span></span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">pkg_info</span>(<span class="st">&quot;tidymodels&quot;</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co"># View version</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>res<span class="sc">$</span>Version</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co"># [1] &quot;1.3.0&quot;</span></span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co"># View title</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>res<span class="sc">$</span>Title</span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a><span class="co"># [1] &quot;Easily Install and Load the &#39;Tidymodels&#39; Packages&quot;</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a><span class="co"># View release date</span></span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>res<span class="sc">$</span>ReleaseDate</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a><span class="co"># [1] &quot;2025-02-21&quot;</span></span></code></pre></div>
+<p>Note that, by default, the version of the package returned is the
+version of the package located on the current machine, in the current
+version of the R repository. If the package is not installed in the
+current R repository, the function will return the latest version on
+CRAN.</p>
+<p>Also note that the object provides a complete list of all functions
+exported by the package. The function list can be accessed
+programmatically, and also viewed using the <code>verbose</code>
+parameter of the <code>print()</code> function:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># Get package info</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">pkg_info</span>(<span class="st">&quot;tidymodels&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co"># View functions</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="fu">print</span>(res, <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co"># # A package info object: tidymodels package</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co"># - Version: v1.3.0</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co"># - Release Date: 2025-02-21</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co"># - Title: Easily Install and Load the &#39;Tidymodels&#39; Packages</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co"># - Maintainer: Max Kuhn &lt;max@posit.co&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co"># - License: MIT + file LICENSE</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co"># - Description: The tidy modeling &quot;verse&quot; is a collection of packages for</span></span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co"># modeling and statistical analysis that share the underlying design</span></span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co"># philosophy, grammar, and data structures of the tidyverse.</span></span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co"># - Depends: R (&gt;= 3.6)</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co"># - Imports: broom (&gt;= 1.0.7), cli (&gt;= 3.6.4), conflicted (&gt;= 1.2.0), </span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co"># dials (&gt;= 1.4.0), dplyr (&gt;= 1.1.4), ggplot2 (&gt;= 3.5.1), hardhat (&gt;= 1.4.1), </span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co"># infer (&gt;= 1.0.7), modeldata (&gt;= 1.4.0), parsnip (&gt;= 1.3.0), purrr (&gt;= 1.0.4), </span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co"># recipes (&gt;= 1.1.1), rlang (&gt;= 1.1.5), rsample (&gt;= 1.2.1), rstudioapi (&gt;= 0.17.1), </span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co"># tibble (&gt;= 3.2.1), tidyr (&gt;= 1.3.1), tune (&gt;= 1.3.0), workflows (&gt;= 1.2.0), </span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co"># workflowsets (&gt;= 1.1.0), yardstick (&gt;= 1.3.2)</span></span>
+<span id="cb4-22"><a href="#cb4-22" tabindex="-1"></a><span class="co"># - Suggests: covr, glue, knitr, rmarkdown, testthat (&gt;= 3.0.0), xml2</span></span>
+<span id="cb4-23"><a href="#cb4-23" tabindex="-1"></a><span class="co"># - Downloads/Month: 31789</span></span>
+<span id="cb4-24"><a href="#cb4-24" tabindex="-1"></a><span class="co"># - Repository: CRAN</span></span>
+<span id="cb4-25"><a href="#cb4-25" tabindex="-1"></a><span class="co"># - Cached: TRUE</span></span>
+<span id="cb4-26"><a href="#cb4-26" tabindex="-1"></a><span class="co"># - Functions: </span></span>
+<span id="cb4-27"><a href="#cb4-27" tabindex="-1"></a><span class="co">#   - pkg_deps(): x, recursive</span></span>
+<span id="cb4-28"><a href="#cb4-28" tabindex="-1"></a><span class="co">#   - print.tidymodels_conflicts(): x, ..., startup</span></span>
+<span id="cb4-29"><a href="#cb4-29" tabindex="-1"></a><span class="co">#   - tag_attach(): tag</span></span>
+<span id="cb4-30"><a href="#cb4-30" tabindex="-1"></a><span class="co">#   - tag_show()</span></span>
+<span id="cb4-31"><a href="#cb4-31" tabindex="-1"></a><span class="co">#   - tag_update(): tag</span></span>
+<span id="cb4-32"><a href="#cb4-32" tabindex="-1"></a><span class="co">#   - tidymodels_conflicts()</span></span>
+<span id="cb4-33"><a href="#cb4-33" tabindex="-1"></a><span class="co">#   - tidymodels_packages(): include_self</span></span>
+<span id="cb4-34"><a href="#cb4-34" tabindex="-1"></a><span class="co">#   - tidymodels_prefer(): quiet</span></span>
+<span id="cb4-35"><a href="#cb4-35" tabindex="-1"></a><span class="co">#   - tidymodels_update(): pkg, recursive, ...</span></span></code></pre></div>
+</div>
+<div id="stability-assessment" class="section level2">
+<h2>Stability Assessment</h2>
+<p>Besides general information about a package, you may also view the
+“stability” of a package. The <code>pkg_stability()</code> function
+looks at the entire history of the package, and attempts to assess its
+overall stability in terms of breaking changes. Here, a “breaking
+change” means either a removed function or removed function parameter.
+The <code>pkg_stability()</code> function is very useful when you are
+writing production code, and want to select the most stable packages
+possible. The results of this function can help you make that
+determination:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a></span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co"># View package stability</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="fu">pkg_stability</span>(<span class="st">&quot;tidymodels&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="co"># # A stability score: tidymodels package</span></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># - Age: 6.58 years</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co"># - Score: 100.0</span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co"># - Assessment: Perfect</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co"># - Version Range: 0.0.1/1.3.0</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co"># - Release Range: 2018-07-27/2025-02-21</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co"># - Release Count: 14</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co"># - Breaking Releases: 0</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co"># - Data: </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#       Package Version                FileName    Release  Size AF AP RF RP BC TF</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co"># 1  tidymodels   1.3.0 tidymodels_1.3.0.tar.gz 2025-02-21 46.4K  0  0  0  0  0  9</span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co"># 2  tidymodels   1.2.0 tidymodels_1.2.0.tar.gz 2024-03-25 49.6K  0  0  0  0  0  9</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co"># 3  tidymodels   1.1.1 tidymodels_1.1.1.tar.gz 2023-08-24   50K  0  0  0  0  0  9</span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co"># 4  tidymodels   1.1.0 tidymodels_1.1.0.tar.gz 2023-05-01   49K  0  0  0  0  0  9</span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co"># 5  tidymodels   1.0.0 tidymodels_1.0.0.tar.gz 2022-07-13   75K  0  0  0  0  0  9</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co"># 6  tidymodels   0.2.0 tidymodels_0.2.0.tar.gz 2022-03-19   75K  0  0  0  0  0  9</span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co"># 7  tidymodels   0.1.4 tidymodels_0.1.4.tar.gz 2021-10-01   17K  0  0  0  0  0  9</span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co"># 8  tidymodels   0.1.3 tidymodels_0.1.3.tar.gz 2021-04-19   15K  1  0  0  0  0  9</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co"># 9  tidymodels   0.1.2 tidymodels_0.1.2.tar.gz 2020-11-22   26K  0  0  0  0  0  8</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co"># 10 tidymodels   0.1.1 tidymodels_0.1.1.tar.gz 2020-07-14   25K  0  0  0  0  0  8</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co"># 11 tidymodels   0.1.0 tidymodels_0.1.0.tar.gz 2020-02-16   57K  0  0  0  0  0  8</span></span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a><span class="co"># 12 tidymodels   0.0.3 tidymodels_0.0.3.tar.gz 2019-10-05   19K  0  0  0  0  0  8</span></span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a><span class="co"># 13 tidymodels   0.0.2 tidymodels_0.0.2.tar.gz 2018-11-27   18K  0  0  0  0  0  8</span></span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a><span class="co"># 14 tidymodels   0.0.1 tidymodels_0.0.1.tar.gz 2018-07-27   18K  8  8  0  0  0  8</span></span></code></pre></div>
+<p>The stability score is calculated generally as the percentage of
+non-breaking releases. Breaking releases are also weighted to reduce
+their impact over time. The above score of 100 for
+<strong>tidymodels</strong> means that the package has never had a
+breaking change. It is therefore given a stability assessment of
+“Perfect”.</p>
+<p>Now let’s look at a package with some breaking changes:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co"># View package stability</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="fu">pkg_stability</span>(<span class="st">&quot;dbplyr&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co"># # A stability score: dbplyr package</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co"># - Age: 7.67 years</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co"># - Score: 73.7</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co"># - Assessment: Unstable</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co"># - Version Range: 1.0.0/2.5.0</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co"># - Release Range: 2017-06-09/2024-03-19</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co"># - Release Count: 23</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co"># - Breaking Releases: 10</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co"># - Data: </span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#    Package Version            FileName    Release   Size  AF  AP RF RP BC  TF</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co"># 1   dbplyr   2.5.0 dbplyr_2.5.0.tar.gz 2024-03-19 752.6K  32   6 12  0  1 611</span></span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co"># 2   dbplyr   2.4.0 dbplyr_2.4.0.tar.gz 2023-10-26   743K  74  80 45 33  1 591</span></span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co"># 3   dbplyr   2.3.4 dbplyr_2.3.4.tar.gz 2023-09-27   706K   0   0  0  0  0 562</span></span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co"># 4   dbplyr   2.3.3 dbplyr_2.3.3.tar.gz 2023-07-07   706K   0   0  0  0  0 562</span></span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a><span class="co"># 5   dbplyr   2.3.2 dbplyr_2.3.2.tar.gz 2023-03-21   707K   0   1  0  1  1 562</span></span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a><span class="co"># 6   dbplyr   2.3.1 dbplyr_2.3.1.tar.gz 2023-02-24   707K   5   6  1  0  1 562</span></span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a><span class="co"># 7   dbplyr   2.3.0 dbplyr_2.3.0.tar.gz 2023-01-16   688K  33  16  5  1  1 558</span></span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a><span class="co"># 8   dbplyr   2.2.1 dbplyr_2.2.1.tar.gz 2022-06-27   655K   4   0  0  0  0 530</span></span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a><span class="co"># 9   dbplyr   2.2.0 dbplyr_2.2.0.tar.gz 2022-06-05   655K 136  47 53  1  1 526</span></span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a><span class="co"># 10  dbplyr   2.1.1 dbplyr_2.1.1.tar.gz 2021-04-06   568K   5   0  0  0  0 443</span></span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a><span class="co"># 11  dbplyr   2.1.0 dbplyr_2.1.0.tar.gz 2021-02-03   566K  15   2  0  0  0 438</span></span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a><span class="co"># 12  dbplyr   2.0.0 dbplyr_2.0.0.tar.gz 2020-11-03   522K 139  33 94 11  1 423</span></span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a><span class="co"># 13  dbplyr   1.4.4 dbplyr_1.4.4.tar.gz 2020-05-27   417K   5   0  0  0  0 378</span></span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a><span class="co"># 14  dbplyr   1.4.3 dbplyr_1.4.3.tar.gz 2020-04-19   413K   9   3  2  2  1 373</span></span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a><span class="co"># 15  dbplyr   1.4.2 dbplyr_1.4.2.tar.gz 2019-06-17   296K   1   0  0  0  0 366</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a><span class="co"># 16  dbplyr   1.4.1 dbplyr_1.4.1.tar.gz 2019-06-06   296K   1   0  0  0  0 365</span></span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a><span class="co"># 17  dbplyr   1.4.0 dbplyr_1.4.0.tar.gz 2019-04-24   295K  24  30 17 13  1 364</span></span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co"># 18  dbplyr   1.3.0 dbplyr_1.3.0.tar.gz 2019-01-09   263K   2   0  0  0  0 357</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co"># 19  dbplyr   1.2.2 dbplyr_1.2.2.tar.gz 2018-07-25   258K   0   0  0  0  0 355</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co"># 20  dbplyr   1.2.1 dbplyr_1.2.1.tar.gz 2018-02-19   257K   0   0  0  0  0 355</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co"># 21  dbplyr   1.2.0 dbplyr_1.2.0.tar.gz 2018-01-03   257K  43   6  2  2  1 355</span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co"># 22  dbplyr   1.1.0 dbplyr_1.1.0.tar.gz 2017-06-27   241K  23   2  0  0  0 314</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co"># 23  dbplyr   1.0.0 dbplyr_1.0.0.tar.gz 2017-06-09   235K 291 291  0  0  0 291</span></span></code></pre></div>
+<p>As seen above, the <strong>dbplyr</strong> package has had a lot of
+breaking changes. Which releases had breaking changes are shown in the
+“BC” column of the data grid. The “AF” and “AP” columns stand for “Added
+Functions” and “Added Parameters”, while “RF” and “RP” mean “Removed
+Functions” and “Removed Parameters”. “TF” is the total number of
+exported functions in that version of the package.</p>
+<p>Since this package has issued breaking changes in 10 out of 23
+releases, it gets a stability score of 73.7, and an assessment of
+“Unstable”. A stability assessment of “Unstable” does not necessarily
+mean you should not use the package. Whether or not you use the package
+depends on your situation, and the amount of risk you can tolerate.</p>
+</div>
+<div id="comparing-package-versions" class="section level2">
+<h2>Comparing Package Versions</h2>
+<p>If you find a package with breaking changes, you would then want to
+know what those breaking changes are. The breaking changes between
+package versions can be discovered with the <code>pkg_diff()</code>
+function. This function accepts a package name, and the two versions of
+the package you wish to compare.</p>
+<p>Looking at our stability data above, let’s examine the breaking
+changes between versions “2.4.0” and “2.5.0” of
+<strong>dbplyr</strong>:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="co"># Compare package versions</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">pkg_diff</span>(<span class="st">&quot;dbplyr&quot;</span>, <span class="st">&quot;2.4.0&quot;</span>, <span class="st">&quot;2.5.0&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># # A difference object: dbplyr package</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># - Comparing: v2.4.0/v2.5.0</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co"># - Breaking Changes: TRUE</span></span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co"># - Added Functions: </span></span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a><span class="co">#   - [.dbplyr_table_path()</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#   - [[.dbplyr_table_path()</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#   - as_table_path()</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#   - c.dbplyr_table_path()</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#   - check_table_path()</span></span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#   - complete.tbl_lazy()</span></span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a><span class="co">#   - db_explain.Oracle()</span></span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a><span class="co">#   - db_explain.OraConnection()</span></span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a><span class="co">#   - db_sql_render.Microsoft SQL Server()</span></span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a><span class="co">#   - escape.dbplyr_table_path()</span></span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a><span class="co">#   - escape.default()</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="co">#   - expand.tbl_lazy()</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#   - fill.tbl_lazy()</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#   - group_by_drop_default.tbl_lazy()</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#   - intersect.tbl_lazy()</span></span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a><span class="co">#   - is_table_path()</span></span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a><span class="co">#   - pivot_longer.tbl_lazy()</span></span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="co">#   - pivot_wider.tbl_lazy()</span></span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a><span class="co">#   - print.dbplyr_table_path()</span></span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a><span class="co">#   - reframe.tbl_lazy()</span></span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a><span class="co">#   - replace_na.tbl_lazy()</span></span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#   - setdiff.OraConnection()</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#   - setdiff.tbl_lazy()</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#   - setdiff.tbl_Oracle()</span></span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a><span class="co">#   - simulate_mariadb()</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a><span class="co">#   - sql_escape_ident.default()</span></span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a><span class="co">#   - sql_escape_ident.MySQLConnection()</span></span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#   - sql_escape_string.default()</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#   - table_path_components()</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#   - table_path_components.default()</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#   - table_path_name()</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#   - union.tbl_lazy()</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co"># - Added Parameters: </span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#   - flatten_query.base_query(): con</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#   - flatten_query.multi_join_query(): con</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#   - flatten_query.select_query(): con</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#   - flatten_query.union_query(): con</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#   - flatten_query.values_query(): con</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#   - sql_translation.MySQL(): con</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co"># - Removed Functions: </span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#   - as_table_ident.character()</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#   - as_table_ident.dbplyr_catalog()</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#   - as_table_ident.dbplyr_schema()</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#   - as_table_ident.dbplyr_table_ident()</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#   - as_table_ident.Id()</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#   - as_table_ident.ident()</span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#   - as_table_ident.ident_q()</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#   - as_table_ident.sql()</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#   - escape.dbplyr_table_ident()</span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#   - format.dbplyr_table_ident()</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#   - sql_escape_ident.DBIConnection()</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#   - sql_escape_string.DBIConnection()</span></span></code></pre></div>
+<p>As you can see, many new functions and function parameters have been
+added between these two versions. In addition, there are 12 functions
+that have been removed. It is up to you to determine whether and how
+these removals will affect your programs. It is very convenient,
+however, to have an accurate accounting of package changes. These
+changes can help you plan your package upgrades and anticipate
+breakages.</p>
+</div>
+<div id="listing-package-versions" class="section level2">
+<h2>Listing Package Versions</h2>
+<p>Another question you may ask when evaluating a package is: How many
+versions of a package are there? <strong>pkgdiff</strong> provides two
+tools to find version information: <code>pkg_versions()</code> and
+<code>pkg_repo()</code>.</p>
+<p><code>pkg_versions()</code> returns all the versions of a package in
+a data frame, along with release dates for each version. It works like
+this:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="co"># Get package versions</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">pkg_versions</span>(<span class="st">&quot;stringr&quot;</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#    Package Version              FileName    Release   Size</span></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="co"># 1  stringr   1.5.1  stringr_1.5.1.tar.gz 2023-11-14   172K</span></span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co"># 2  stringr   1.5.0  stringr_1.5.0.tar.gz 2022-12-02   172K</span></span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co"># 3  stringr   1.4.1  stringr_1.4.1.tar.gz 2022-08-21   133K</span></span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a><span class="co"># 4  stringr   1.4.0  stringr_1.4.0.tar.gz 2019-02-10   133K</span></span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="co"># 5  stringr   1.3.1  stringr_1.3.1.tar.gz 2018-05-10   116K</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co"># 6  stringr   1.3.0  stringr_1.3.0.tar.gz 2018-02-19   116K</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co"># 7  stringr   1.2.0  stringr_1.2.0.tar.gz 2017-02-18    92K</span></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co"># 8  stringr   1.1.0  stringr_1.1.0.tar.gz 2016-08-19    62K</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co"># 9  stringr   1.0.0  stringr_1.0.0.tar.gz 2015-04-30    34K</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co"># 10 stringr   0.6.2  stringr_0.6.2.tar.gz 2012-12-06    20K</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co"># 11 stringr   0.6.1  stringr_0.6.1.tar.gz 2012-07-25    20K</span></span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a><span class="co"># 12 stringr     0.6    stringr_0.6.tar.gz 2011-12-08    20K</span></span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a><span class="co"># 13 stringr     0.5    stringr_0.5.tar.gz 2011-06-30    18K</span></span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a><span class="co"># 14 stringr     0.4    stringr_0.4.tar.gz 2010-08-24    16K</span></span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a><span class="co"># 15 stringr     0.3    stringr_0.3.tar.gz 2010-02-15    11K</span></span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a><span class="co"># 16 stringr     0.2    stringr_0.2.tar.gz 2009-11-16    10K</span></span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a><span class="co"># 17 stringr  0.1.10 stringr_0.1.10.tar.gz 2009-11-09   6.8K</span></span></code></pre></div>
+<p>Observe that the <strong>stringr</strong> package has had 17
+releases. The first release was in 2009, and the most recent in 2023.
+This information is scraped from the CRAN archive site. It is useful for
+understanding the release history of a package, and knowing which
+versions of a package are available.</p>
+<p>Next, you may want to know which versions of packages you have
+installed in your R repository. This information can be queried using
+the <code>pkg_repo()</code> function. Let’s take a look:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co"># Check version in repo</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="fu">pkg_repo</span>(<span class="st">&quot;stringr&quot;</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># # A package repo object</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co"># - Repo Version: 4.4</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co"># - Packages:</span></span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a><span class="co">#   Package Version</span></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a><span class="co"># 1 stringr   1.5.1</span></span></code></pre></div>
+<p>Base on the above information, it appears we have the latest version
+of <strong>stringr</strong> installed in our R 4.4 repo. Good to
+know!</p>
+<p>Can <code>pkg_repo()</code> be used to get versions for multiple
+packages? Yes! Here is how:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co"># Create vector of packages</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>v1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;curl&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;fmtr&quot;</span>, <span class="st">&quot;purrr&quot;</span>)</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co"># Get current versions</span></span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>res1 <span class="ot">&lt;-</span> <span class="fu">pkg_repo</span>(v1, <span class="at">ver =</span> <span class="st">&quot;current&quot;</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>res1</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># # A package repo object</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co"># - Repo Version: 4.4</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a><span class="co"># - Packages:</span></span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a><span class="co">#   Package Version</span></span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a><span class="co"># 1    curl   5.2.1</span></span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a><span class="co"># 2   dplyr   1.1.4</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a><span class="co"># 3    fmtr   1.6.5</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a><span class="co"># 4   purrr   1.0.2</span></span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a><span class="co"># Get latest versions</span></span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>res2 <span class="ot">&lt;-</span> <span class="fu">pkg_repo</span>(v1, <span class="at">ver =</span> <span class="st">&quot;latest&quot;</span>)</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a></span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>res2</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a><span class="co"># # A package repo object</span></span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a><span class="co"># - Repo Version: latest</span></span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a><span class="co"># - Packages:</span></span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a><span class="co">#   Package Version</span></span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a><span class="co"># 1    curl   6.2.1</span></span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a><span class="co"># 2   dplyr   1.1.4</span></span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co"># 3    fmtr   1.6.8</span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co"># 4   purrr   1.0.4</span></span></code></pre></div>
+<p>Moreover, if you run <code>pkg_repo()</code> without any parameters,
+it will return all the R packages you have installed, along with their
+versions. Nice!</p>
+<p>The <code>pkg_repo()</code> function is very useful when dealing with
+large numbers of packages. This function feeds directly into the next
+two topics, which discuss operations on entire repositories.</p>
+</div>
+<div id="anticipating-breakages" class="section level2">
+<h2>Anticipating Breakages</h2>
+<p>One of the main motivations for creating <strong>pkgdiff</strong> was
+to find a way to better handle repository upgrades. As it stands,
+repository upgrades can be a chaotic experience. When you have several
+hundred packages in your repository, you will surely have some of them
+break when you go to upgrade. Wouldn’t it be nice to at least know which
+packages are going to break? That is the topic of this next section.</p>
+<div id="small-set-of-packages" class="section level3">
+<h3>Small Set of Packages</h3>
+<p>First, let’s see how we can anticipate breaking changes on a small
+number of packages.</p>
+<p>For this exercise, we will use the <code>res1</code> and
+<code>res2</code> data frames from the previous section. These data
+frames were created using <code>pkg_repo()</code>, and contain version
+numbers for four R packages. These data frames are in fact perfect
+inputs to our next function: <code>repo_breakages()</code>.</p>
+<p>The <code>repo_breakages()</code> function can compare packages in
+bulk. It will perform difference operations on any number of packages,
+and tell you whether or not there will be any breaking changes. As you
+can imagine, this function is well suited for repository upgrades. Here
+is an example:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="co"># View upgrade breakages</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">repo_breakages</span>(res1, res2) </span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co"># Comparing curl v5.2.1/v6.2.0</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co"># Comparing fmtr v1.6.5/v1.6.8</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co"># Comparing purrr v1.0.2/v1.0.4</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co"># # A repo breakages object</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="co"># - Run Datetime: 2025-03-01 17:58 UTC</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co"># - Summary:</span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#   Package Version1 Version2 Breakages</span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co"># 1    curl    5.2.1    6.2.1      TRUE</span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co"># 2   dplyr    1.1.4    1.1.4     FALSE</span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co"># 3    fmtr    1.6.5    1.6.8     FALSE</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co"># 4   purrr    1.0.2    1.0.4     FALSE</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co"># - Details:</span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co"># # A difference object: curl package</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co"># - Comparing: v5.2.1/v6.2.1</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co"># - Breaking Changes: TRUE</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co"># - Added Functions: 1</span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co"># - Added Parameters: 3</span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co"># - Removed Parameters: </span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#   - multi_download(): timeout</span></span></code></pre></div>
+<p>The <code>repo_breakages()</code> function returns a list with two
+major items: “Summary” and “Details”. The “Summary” item is a data frame
+showing the input packages, the input package versions, and a TRUE or
+FALSE flag that describes whether there are any breaking changes between
+the two package versions. The “details” list item then provides the
+difference object for any package that had a breaking change. This
+function tells you exactly what you need to know before a repository
+upgrade. If desired, you can then use the difference information to scan
+your code, and determine whether those removals will break anything.</p>
+</div>
+<div id="entire-repository" class="section level3">
+<h3>Entire Repository</h3>
+<p>The above demonstration showed how to use
+<code>repo_breakages()</code> on a small number of packages. Now let’s
+see how to use the function on a large number of packages. In fact, we
+will perform an upgrade analyse on our entire R repository:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a></span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a><span class="co"># Get current versions from local repo</span></span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>r1 <span class="ot">&lt;-</span> <span class="fu">pkg_repo</span>(<span class="at">ver =</span> <span class="st">&quot;current&quot;</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a><span class="co"># View Results</span></span>
+<span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a>r1</span>
+<span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a><span class="co"># # A package repo object</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co"># - Repo Version: 4.2</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co"># - Packages:</span></span>
+<span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#            Package              Version</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co"># 1            abind                1.4-5</span></span>
+<span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co"># 2          admiral               0.10.1</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co"># 3       admiraldev                0.3.0</span></span>
+<span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="co"># 4      admiralonco                0.3.0</span></span>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co"># 5             ards                0.1.0</span></span>
+<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co"># 6            arrow             11.0.0.3</span></span>
+<span id="cb12-17"><a href="#cb12-17" tabindex="-1"></a><span class="co"># 7          askpass                  1.1</span></span>
+<span id="cb12-18"><a href="#cb12-18" tabindex="-1"></a><span class="co"># 8       assertthat                0.2.1</span></span>
+<span id="cb12-19"><a href="#cb12-19" tabindex="-1"></a><span class="co"># 9           aws.s3               0.3.21</span></span>
+<span id="cb12-20"><a href="#cb12-20" tabindex="-1"></a><span class="co"># 10   aws.signature                0.6.0</span></span>
+<span id="cb12-21"><a href="#cb12-21" tabindex="-1"></a><span class="co"># 11       backports                1.4.1</span></span>
+<span id="cb12-22"><a href="#cb12-22" tabindex="-1"></a><span class="co"># 12       base64enc                0.1-3</span></span>
+<span id="cb12-23"><a href="#cb12-23" tabindex="-1"></a><span class="co"># 13             bit                4.0.4</span></span>
+<span id="cb12-24"><a href="#cb12-24" tabindex="-1"></a><span class="co"># 14           bit64                4.0.5</span></span>
+<span id="cb12-25"><a href="#cb12-25" tabindex="-1"></a><span class="co"># 15          bitops                1.0-7</span></span>
+<span id="cb12-26"><a href="#cb12-26" tabindex="-1"></a><span class="co"># 16            blob                1.2.3</span></span>
+<span id="cb12-27"><a href="#cb12-27" tabindex="-1"></a><span class="co"># ...</span></span>
+<span id="cb12-28"><a href="#cb12-28" tabindex="-1"></a></span>
+<span id="cb12-29"><a href="#cb12-29" tabindex="-1"></a><span class="co"># Get latest versions of current repo on CRAN</span></span>
+<span id="cb12-30"><a href="#cb12-30" tabindex="-1"></a>r2 <span class="ot">&lt;-</span> <span class="fu">pkg_repo</span>(r1<span class="sc">$</span>Package, <span class="at">ver =</span> <span class="st">&quot;latest&quot;</span>)</span>
+<span id="cb12-31"><a href="#cb12-31" tabindex="-1"></a></span>
+<span id="cb12-32"><a href="#cb12-32" tabindex="-1"></a><span class="co"># View Results</span></span>
+<span id="cb12-33"><a href="#cb12-33" tabindex="-1"></a>r2</span>
+<span id="cb12-34"><a href="#cb12-34" tabindex="-1"></a><span class="co"># # A package repo object</span></span>
+<span id="cb12-35"><a href="#cb12-35" tabindex="-1"></a><span class="co"># - Repo Version: latest</span></span>
+<span id="cb12-36"><a href="#cb12-36" tabindex="-1"></a><span class="co"># - Packages:</span></span>
+<span id="cb12-37"><a href="#cb12-37" tabindex="-1"></a><span class="co">#            Package    Version</span></span>
+<span id="cb12-38"><a href="#cb12-38" tabindex="-1"></a><span class="co"># 1            abind      1.4-8</span></span>
+<span id="cb12-39"><a href="#cb12-39" tabindex="-1"></a><span class="co"># 2          admiral      1.2.0</span></span>
+<span id="cb12-40"><a href="#cb12-40" tabindex="-1"></a><span class="co"># 3       admiraldev      1.2.0</span></span>
+<span id="cb12-41"><a href="#cb12-41" tabindex="-1"></a><span class="co"># 4      admiralonco      1.2.0</span></span>
+<span id="cb12-42"><a href="#cb12-42" tabindex="-1"></a><span class="co"># 5             ards      0.1.1</span></span>
+<span id="cb12-43"><a href="#cb12-43" tabindex="-1"></a><span class="co"># 6            arrow   18.1.0.1</span></span>
+<span id="cb12-44"><a href="#cb12-44" tabindex="-1"></a><span class="co"># 7          askpass      1.2.1</span></span>
+<span id="cb12-45"><a href="#cb12-45" tabindex="-1"></a><span class="co"># 8       assertthat      0.2.1</span></span>
+<span id="cb12-46"><a href="#cb12-46" tabindex="-1"></a><span class="co"># 9           aws.s3     0.3.21</span></span>
+<span id="cb12-47"><a href="#cb12-47" tabindex="-1"></a><span class="co"># 10   aws.signature      0.6.0</span></span>
+<span id="cb12-48"><a href="#cb12-48" tabindex="-1"></a><span class="co"># 11       backports      1.5.0</span></span>
+<span id="cb12-49"><a href="#cb12-49" tabindex="-1"></a><span class="co"># 12       base64enc      0.1-3</span></span>
+<span id="cb12-50"><a href="#cb12-50" tabindex="-1"></a><span class="co"># 13             bit    4.5.0.1</span></span>
+<span id="cb12-51"><a href="#cb12-51" tabindex="-1"></a><span class="co"># 14           bit64    4.6.0-1</span></span>
+<span id="cb12-52"><a href="#cb12-52" tabindex="-1"></a><span class="co"># 15          bitops      1.0-9</span></span>
+<span id="cb12-53"><a href="#cb12-53" tabindex="-1"></a><span class="co"># 16            blob      1.2.4</span></span>
+<span id="cb12-54"><a href="#cb12-54" tabindex="-1"></a><span class="co"># ...</span></span>
+<span id="cb12-55"><a href="#cb12-55" tabindex="-1"></a></span>
+<span id="cb12-56"><a href="#cb12-56" tabindex="-1"></a></span>
+<span id="cb12-57"><a href="#cb12-57" tabindex="-1"></a><span class="co"># Check for breakages on whole repository</span></span>
+<span id="cb12-58"><a href="#cb12-58" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">repo_breakages</span>(r1, r2)</span>
+<span id="cb12-59"><a href="#cb12-59" tabindex="-1"></a><span class="co"># Comparing abind v1.4-5/v1.4-8</span></span>
+<span id="cb12-60"><a href="#cb12-60" tabindex="-1"></a><span class="co"># Comparing admiral v0.10.1/v1.2.0</span></span>
+<span id="cb12-61"><a href="#cb12-61" tabindex="-1"></a><span class="co"># Comparing admiraldev v0.3.0/v1.2.0</span></span>
+<span id="cb12-62"><a href="#cb12-62" tabindex="-1"></a><span class="co"># Comparing admiralonco v0.3.0/v1.2.0</span></span>
+<span id="cb12-63"><a href="#cb12-63" tabindex="-1"></a><span class="co"># Comparing ards v0.1.0/v0.1.1</span></span>
+<span id="cb12-64"><a href="#cb12-64" tabindex="-1"></a><span class="co"># Archive versions of &#39;ards&#39; not available.</span></span>
+<span id="cb12-65"><a href="#cb12-65" tabindex="-1"></a><span class="co"># Comparing arrow v11.0.0.3/v18.1.0.1</span></span>
+<span id="cb12-66"><a href="#cb12-66" tabindex="-1"></a><span class="co"># Comparing askpass v1.1/v1.2.1</span></span>
+<span id="cb12-67"><a href="#cb12-67" tabindex="-1"></a><span class="co"># Comparing backports v1.4.1/v1.5.0</span></span>
+<span id="cb12-68"><a href="#cb12-68" tabindex="-1"></a><span class="co"># Comparing bit v4.0.4/v4.5.0.1</span></span>
+<span id="cb12-69"><a href="#cb12-69" tabindex="-1"></a><span class="co"># Comparing bit64 v4.0.5/v4.6.0-1</span></span>
+<span id="cb12-70"><a href="#cb12-70" tabindex="-1"></a><span class="co"># Comparing bitops v1.0-7/v1.0-9</span></span>
+<span id="cb12-71"><a href="#cb12-71" tabindex="-1"></a><span class="co"># Comparing blob v1.2.3/v1.2.4</span></span>
+<span id="cb12-72"><a href="#cb12-72" tabindex="-1"></a><span class="co"># Comparing box v1.1.3/v1.2.0</span></span>
+<span id="cb12-73"><a href="#cb12-73" tabindex="-1"></a><span class="co"># Comparing brew v1.0-8/v1.0-10</span></span>
+<span id="cb12-74"><a href="#cb12-74" tabindex="-1"></a><span class="co"># Comparing brio v1.1.3/v1.1.5</span></span>
+<span id="cb12-75"><a href="#cb12-75" tabindex="-1"></a><span class="co"># Comparing broom v1.0.1/v1.0.7</span></span>
+<span id="cb12-76"><a href="#cb12-76" tabindex="-1"></a><span class="co"># Comparing bslib v0.4.0/v0.9.0</span></span>
+<span id="cb12-77"><a href="#cb12-77" tabindex="-1"></a><span class="co"># Comparing cachem v1.0.6/v1.1.0</span></span>
+<span id="cb12-78"><a href="#cb12-78" tabindex="-1"></a><span class="co"># Comparing callr v3.7.3/v3.7.6</span></span>
+<span id="cb12-79"><a href="#cb12-79" tabindex="-1"></a><span class="co"># ...</span></span></code></pre></div>
+<p>When the processing finishes, you can examine the results using
+dollar sign ($) notation:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co"># View Summary Table</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>res<span class="sc">$</span>Summary</span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co">#            Package             Version1   Version2 Breakages</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a><span class="co"># 1            abind                1.4-5      1.4-8     FALSE</span></span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a><span class="co"># 2          admiral               0.10.1      1.2.0      TRUE</span></span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co"># 3       admiraldev                0.3.0      1.2.0      TRUE</span></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># 4      admiralonco                0.3.0      1.2.0      TRUE</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="co"># 5             ards                0.1.0      0.1.1        NA</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co"># 6            arrow             11.0.0.3   18.1.0.1     FALSE</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co"># 7          askpass                  1.1      1.2.1     FALSE</span></span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co"># 8       assertthat                0.2.1      0.2.1     FALSE</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co"># 9           aws.s3               0.3.21     0.3.21     FALSE</span></span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co"># 10   aws.signature                0.6.0      0.6.0     FALSE</span></span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a><span class="co"># 11       backports                1.4.1      1.5.0     FALSE</span></span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a><span class="co"># 12       base64enc                0.1-3      0.1-3     FALSE</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a><span class="co"># 13             bit                4.0.4    4.5.0.1     FALSE</span></span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a><span class="co"># 14           bit64                4.0.5    4.6.0-1      TRUE</span></span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a><span class="co"># 15          bitops                1.0-7      1.0-9     FALSE</span></span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a><span class="co"># 16            blob                1.2.3      1.2.4     FALSE</span></span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a><span class="co"># ...</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a><span class="co"># View Difference Details</span></span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a>res<span class="sc">$</span>Details<span class="sc">$</span>admiralonco</span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a><span class="co"># # A difference object: admiralonco package</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a><span class="co"># - Comparing: v0.3.0/v1.2.0</span></span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a><span class="co"># - Breaking Changes: TRUE</span></span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a><span class="co"># - Added Functions: </span></span>
+<span id="cb13-28"><a href="#cb13-28" tabindex="-1"></a><span class="co">#   - bor_cr()</span></span>
+<span id="cb13-29"><a href="#cb13-29" tabindex="-1"></a><span class="co">#   - bor_ne()</span></span>
+<span id="cb13-30"><a href="#cb13-30" tabindex="-1"></a><span class="co">#   - bor_non_crpd()</span></span>
+<span id="cb13-31"><a href="#cb13-31" tabindex="-1"></a><span class="co">#   - bor_pd()</span></span>
+<span id="cb13-32"><a href="#cb13-32" tabindex="-1"></a><span class="co">#   - bor_pr()</span></span>
+<span id="cb13-33"><a href="#cb13-33" tabindex="-1"></a><span class="co">#   - bor_sd()</span></span>
+<span id="cb13-34"><a href="#cb13-34" tabindex="-1"></a><span class="co">#   - cb_y()</span></span>
+<span id="cb13-35"><a href="#cb13-35" tabindex="-1"></a><span class="co">#   - cbor_cr()</span></span>
+<span id="cb13-36"><a href="#cb13-36" tabindex="-1"></a><span class="co">#   - cbor_pr()</span></span>
+<span id="cb13-37"><a href="#cb13-37" tabindex="-1"></a><span class="co">#   - crsp_y_cr()</span></span>
+<span id="cb13-38"><a href="#cb13-38" tabindex="-1"></a><span class="co">#   - crsp_y_pr()</span></span>
+<span id="cb13-39"><a href="#cb13-39" tabindex="-1"></a><span class="co">#   - no_data_missing()</span></span>
+<span id="cb13-40"><a href="#cb13-40" tabindex="-1"></a><span class="co">#   - no_data_n()</span></span>
+<span id="cb13-41"><a href="#cb13-41" tabindex="-1"></a><span class="co">#   - rsp_y()</span></span>
+<span id="cb13-42"><a href="#cb13-42" tabindex="-1"></a><span class="co"># - Removed Functions: </span></span>
+<span id="cb13-43"><a href="#cb13-43" tabindex="-1"></a><span class="co">#   - call_aval_fun()</span></span>
+<span id="cb13-44"><a href="#cb13-44" tabindex="-1"></a><span class="co">#   - derive_param_lasta()</span></span></code></pre></div>
+<p>What is convenient is that you can run these functions before any new
+package versions are downloaded and installed.<br />
+They work on archive packages stored on CRAN, not on your local machine.
+In this way, prior to any actual upgrade, you can make a determination
+as to a) whether to proceed with the upgrade or not, and b) how much
+effort it might take to fix any breakages.</p>
+</div>
+</div>
+<div id="assessing-entire-repository" class="section level2">
+<h2>Assessing Entire Repository</h2>
+<p>In addition to anticipating breakages for a large number of packages,
+<strong>pkgdiff</strong> also allows you to gather stability scores for
+a large number of packages. Bulk stability scores are achieved using
+<code>repo_stability()</code>. Here is how to do it:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="co"># Create vector of packages</span></span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>v1 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;curl&quot;</span>, <span class="st">&quot;dplyr&quot;</span>, <span class="st">&quot;dbplyr&quot;</span>, <span class="st">&quot;purrr&quot;</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="co"># Assess stability </span></span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>res <span class="ot">&lt;-</span> <span class="fu">repo_stability</span>(v1)</span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co"># Getting stability score for package &#39;curl&#39;...</span></span>
+<span id="cb14-7"><a href="#cb14-7" tabindex="-1"></a><span class="co"># Getting stability score for package &#39;dplyr&#39;...</span></span>
+<span id="cb14-8"><a href="#cb14-8" tabindex="-1"></a><span class="co"># Getting stability score for package &#39;dbplyr&#39;...</span></span>
+<span id="cb14-9"><a href="#cb14-9" tabindex="-1"></a><span class="co"># Getting stability score for package &#39;purrr&#39;...</span></span>
+<span id="cb14-10"><a href="#cb14-10" tabindex="-1"></a></span>
+<span id="cb14-11"><a href="#cb14-11" tabindex="-1"></a><span class="co"># View results</span></span>
+<span id="cb14-12"><a href="#cb14-12" tabindex="-1"></a>res</span>
+<span id="cb14-13"><a href="#cb14-13" tabindex="-1"></a><span class="co"># # A repo stability object</span></span>
+<span id="cb14-14"><a href="#cb14-14" tabindex="-1"></a><span class="co"># - Run Datetime: 2025-03-01 17:46 UTC</span></span>
+<span id="cb14-15"><a href="#cb14-15" tabindex="-1"></a><span class="co"># - Summary:</span></span>
+<span id="cb14-16"><a href="#cb14-16" tabindex="-1"></a><span class="co">#   Package    FV    LV         FR         LR TR BR Score        Assessment</span></span>
+<span id="cb14-17"><a href="#cb14-17" tabindex="-1"></a><span class="co"># 1    curl   0.2 6.2.1 2014-11-20 2025-02-19 51  1  98.0       Very Stable</span></span>
+<span id="cb14-18"><a href="#cb14-18" tabindex="-1"></a><span class="co"># 2   dplyr   0.1 1.1.4 2014-01-16 2023-11-17 45 20  87.5 Somewhat Unstable</span></span>
+<span id="cb14-19"><a href="#cb14-19" tabindex="-1"></a><span class="co"># 3  dbplyr 1.0.0 2.5.0 2017-06-09 2024-03-19 23 10  74.1          Unstable</span></span>
+<span id="cb14-20"><a href="#cb14-20" tabindex="-1"></a><span class="co"># 4   purrr 0.1.0 1.0.4 2015-09-28 2025-02-05 18  6  92.1            Stable</span></span></code></pre></div>
+<p>The above result shows each package on the input vector, the first
+and last versions, the first and last release dates, and the total
+number of releases. It also shows the number of breaking releases, a
+stability score, and a stablity assessment for each package. This
+information is very helpful to get an overall sense of the stability of
+your repository, and where breaking changes might occur when they
+do.</p>
+<p>Like <code>repo_breakages()</code>, <code>repo_stability()</code> can
+be used to assess an entire repository. Simply use
+<code>pkg_repo()</code> to get the packages in your current repo, and
+pass the “Packages” column into <code>repo_stability()</code>. Remember
+to give <code>repo_stability()</code> plenty of uninterrupted processing
+time if you are assessing a large number of packages.</p>
+</div>
+<div id="next-steps" class="section level2">
+<h2>Next Steps</h2>
+<p>For addition research on <strong>pkgdiff</strong>, you may wish to
+browse the following articles:</p>
+<ul>
+<li><a href="pkgdiff-stability.html">Stability Score</a></li>
+<li><a href="pkgdiff-cache.html">Package Cache</a></li>
+<li><a href="pkgdiff-faq.html">Frequently Asked Questions</a></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

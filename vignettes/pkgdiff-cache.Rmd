@@ -1,0 +1,71 @@
+---
+title: "Package Cache"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Package Cache}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+To improve performance of difference operations, and especially 
+of stability scores, **pkgdiff** uses a cache of pre-processed package
+information on Github.  This cache greatly speeds up the operation
+of **pkgdiff** functions.  The cache is created by a periodic process
+that extracts information from packages on CRAN, and stores it in a way
+that the information can be quickly retrieved when a **pkgdiff** function
+is called.
+
+Note the following about the **pkgdiff** cache:  
+
+1) To access the cache, the computer **pkgdiff** is running on must have 
+access to the internet and, specifically, Github.  If your machine is 
+isolated from the internet, or blocked from Github, **pkgdiff** will error.
+
+2) The cache does not contain all CRAN packages.  It contains packages that
+exceed 1000 downloads per month.  These packages constitute approximately 20%
+of the top CRAN downloads, or about 4000 packages. For most R users, any package 
+you might be interested in will be included in this subset.
+
+3) To find out which packages are in the **pkgdiff** cache, 
+you may call the function `pkg_cache()`. See the documentation of that
+function for additional information.
+
+4) If a package is not in the cache, all **pkgdiff** functions will still work. 
+However, they will be much slower than packages
+that are included in the cache. 
+
+5) You may request that a package be added to the cache by submitting 
+an issue to the **pkgdiff** issue log 
+[here](https://github.com/dbosak01/pkgdiff/issues).
+
+6) Observe that the `pkg_info()` function also returns a parameter
+on whether or not the selected package is in the cache.  It is recommended
+to run `pkg_info()` or `pkg_cache()` first, and check if the package is 
+in the cache before running `pkg_stability()`.
+
+7) If a package is not in the cache, you may speed up `pkg_stability()` by 
+setting either the "releases" or "months" parameters.  Either of these parameters
+will limit the scope of the call to `pkg_stability()`.  For example, if a package has
+a lifespan of 10 years, you can greatly reduce the amount of stability processing
+by reducing the comparison period to 36 months instead of the entire 10 years.
+Do note, however, that such scope reductions may also have an effect on 
+the calculated score and assessment.
+
+8) The package cache is updated periodically, usually every day.  The update 
+looks for new versions of packages that are already in the cache.  If a new
+version is found, the update routine will add the new version to the stored
+infos for that package, and also update the stability data.  The update
+routine also looks for new packages that have recently met the 1000 downloads per month
+threshold.  If such a package is found, it will be added to the cache automatically.
+Packages that fall below the 1000 downloads per month threshold are not removed.
+Once a package has been added to the cache, it will be retained indefinitely.
+
+
+
