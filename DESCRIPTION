@@ -1,7 +1,7 @@
 Package: pkgdiff
 Type: Package
 Title: Identifies Package Differences
-Version: 0.1.9
+Version: 0.2.0
 Maintainer: David Bosak <dbosak01@gmail.com>
 Authors@R: c(
     person(
@@ -37,9 +37,9 @@ Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2025-03-12 22:02:58 UTC; dbosa
+Packaged: 2025-04-13 21:16:16 UTC; dbosa
 Author: David Bosak [aut, cre],
   Brian Varney [ctb],
   Kevin Putschko [ctb]
 Repository: CRAN
-Date/Publication: 2025-03-13 21:10:05 UTC
+Date/Publication: 2025-04-13 21:40:02 UTC

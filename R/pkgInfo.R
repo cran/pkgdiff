@@ -181,8 +181,12 @@ print.pinfo <- function(x, ..., verbose = FALSE) {
     if (!is.null(x$Enhances))
       cat(paste0("- Enhances: ", as.character(x$Enhances), "\n"))
 
-    if (!is.null(x$LastMonthDownloads))
-      cat(paste0("- Downloads/Month: ", as.character(x$LastMonthDownloads), "\n"))
+    if (!is.null(x$LastMonthDownloads)) {
+
+      if (x$LastMonthDownloads > 0)
+        cat(paste0("- Downloads/Month: ", as.character(x$LastMonthDownloads), "\n"))
+
+    }
 
     if (!is.null(x$Suggests))
       cat(paste0("- Repository: ", as.character(x$Repository), "\n"))
@@ -416,6 +420,10 @@ print.pcache <- function(x, ...) {
 #' but the "Archived" flag will be set to TRUE. If the
 #' package is not found on CRAN, the function will emit a message and return
 #' NULL.
+#'
+#' If the package is a Base R package, a reduced number of fields will be returned,
+#' and the package will be marked with \code{Base Package: TRUE}.  Function
+#' lists are not available for Base packages.
 #' @examples
 #' # View package info
 #' pkg_info("glue")
@@ -521,14 +529,14 @@ pkg_info <- function(pkg, ver = "current", cache = TRUE) {
   }
 
   if (length(ver) == 0) {
-
-    ver <- get_latest_version(pkg)
+    ver <- lv
+  } else if (is.na(ver)) {
+    ver <- lv
   }
 
   if (!is.null(ver)) {
+    tmp <- get_archive_versions(pkg)
     if (archived) {
-
-      tmp <- get_archive_versions(pkg)
 
       if (nrow(tmp) > 0) {
 
@@ -536,6 +544,16 @@ pkg_info <- function(pkg, ver = "current", cache = TRUE) {
         archived <- TRUE
 
       }
+    }
+
+    # No archive versions
+    if (is.null(tmp)) {
+      if (ver != lv) {
+        ver <- lv
+      }
+    } else if (!ver %in% tmp$Version) {  # Current version doesn't match anything
+
+      ver <- lv
     }
   }
 

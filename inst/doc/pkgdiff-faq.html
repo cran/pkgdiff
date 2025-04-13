@@ -258,7 +258,8 @@ sequential versions?</a></li>
 <li><a href="#cache">Which packages are in the cache?</a></li>
 <li><a href="#location">Where is the cache located?</a></li>
 <li><a href="#addcache">How can I add a package to the cache?</a></li>
-<li><a href="#report">Can I create a report with pkgdiff?</a></li>
+<li><a href="#report">Can I create a report with
+<strong>pkgdiff</strong>?</a></li>
 <li><a href="#github">Can I use <strong>pkgdiff</strong> with packages
 that are not on CRAN?</a></li>
 <li><a href="#base">Can I use <strong>pkgdiff</strong> with Base R
@@ -456,7 +457,7 @@ calculate stability scores. Packages on Github or locally developed
 packages do not have a predictable and easily accessible archive.</p>
 <p>Note that there is another package on CRAN called
 <strong>packageDiff</strong> that allows you to compare two packages
-locally. This package can generated version differences. It will not,
+locally. This package can generate version differences. It will not,
 however, generate stability scores, or assess an entire repository.</p>
 <p><a href="#top">top</a></p>
 <hr />
@@ -465,7 +466,7 @@ however, generate stability scores, or assess an entire repository.</p>
 <h3>Can I use <strong>pkgdiff</strong> with Base R packages?</h3>
 <p><strong>Q:</strong> I see that <strong>pkgdiff</strong> does not seem
 to work with some very commonly used packages. For instance,
-<code>pkg_info()</code> produces no results for “tools” and “utils”.
+<code>pkg_stabilty()</code> produces no results for “tools” and “utils”.
 Does <strong>pkgdiff</strong> work with Base R packages?</p>
 <p><strong>A:</strong> No. <strong>pkgdiff</strong> only works with
 contributed packages. It does not work with Base R packages, as these
@@ -473,9 +474,9 @@ packages are distributed and archived in a completely different way.</p>
 <p>Some Base R “recommended” packages are published as contributed CRAN
 packages, and will therefore work with <strong>pkgdiff</strong>. But
 packages such as “base”, “tools”, “utils”, “compiler”, “datasets”,
-“graphics”, “grDevices”, “grid”, “methods”, “stats”, etc. will give a
-message saying package data was not found. Data for these packages is
-indeed not found in the same area as most CRAN packages.</p>
+“graphics”, “grDevices”, “grid”, “methods”, “stats”, etc. will give
+limited or no results for most functions in
+<strong>pkgdiff</strong>.</p>
 <p><a href="#top">top</a></p>
 <hr />
 <!-- ### How do I format a data frame? {#overview} -->
