@@ -1,6 +1,6 @@
-1d8df048c03169501f7077cf33e89b1f *DESCRIPTION
+f0e9525c77c8a91bbb70dc786e57954c *DESCRIPTION
 4ae5661a36bfafc9bfed8fcae199219f *NAMESPACE
-798f0850764eabe7fe4d269f373bd0d9 *NEWS.md
+6e84a6febe3c7deff888a5ec49d2363a *NEWS.md
 1c8781247d652fcdd843e868a023fdc1 *R/diff.R
 5d06b82064f1c60935896e8cb6878e54 *R/pkgInfo.R
 2b7004a41b4f9bfa9ca3976915a9ea0c *R/pkgdiff.R
@@ -46,8 +46,8 @@ b201f2e0a4c18820f9214bbc269e4ebf *tests/testthat/data/dat.rds
 509f0191d8cbf537aedd64dde9363f22 *tests/testthat/test-diff.R
 c98009d8e3d09f5e299e50a4609a980e *tests/testthat/test-pkginfo.R
 de397a96996b46d89ce07fd86b753104 *tests/testthat/test-pkgrepo.R
-edc107c916875f0a3c24cff9fa94dfa7 *tests/testthat/test-reports.R
-e1a0aa3d6effa8c9f15b6121420db580 *tests/testthat/test-stability.R
+628ade5e01e1444ce6d7e4cc987e63d0 *tests/testthat/test-reports.R
+007edd7d950feb24aaeb2ae468c0d7e6 *tests/testthat/test-stability.R
 097bb211ed59be79fd550baf834c00fd *tests/testthat/test-utilities.R
 a42dfb6d494706d9f5f56e7547504681 *vignettes/pkgdiff-cache.Rmd
 b57199412ea98c3572d75783825beb2e *vignettes/pkgdiff-faq.Rmd
