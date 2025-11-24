@@ -1,3 +1,10 @@
+# pkgdiff 1.0
+
+* Added logo.
+* Added `pkg_summary()` function for interactive use.
+* Fixed bugs on `pkg_info()` when requesting info on a Base R package. 
+* Upgraded life cycle to "stable".
+
 # pkgdiff 0.2.1
 
 * CRAN fixes.

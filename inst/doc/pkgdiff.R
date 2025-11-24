@@ -157,6 +157,10 @@ library(pkgdiff)
 #  
 
 ## ----eval=FALSE, echo=TRUE----------------------------------------------------
+#  # Get package summary report
+#  pkg_summary("dplyr")
+
+## ----eval=FALSE, echo=TRUE----------------------------------------------------
 #  # Compare package versions
 #  pkg_diff("dbplyr", "2.4.0", "2.5.0")
 #  # # A difference object: dbplyr package

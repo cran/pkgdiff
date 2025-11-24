@@ -1,7 +1,7 @@
 Package: pkgdiff
 Type: Package
 Title: Identifies Package Differences
-Version: 0.2.1
+Version: 1.0.0
 Maintainer: David Bosak <dbosak01@gmail.com>
 Authors@R: c(
     person(
@@ -30,16 +30,16 @@ License: CC0
 Encoding: UTF-8
 URL: https://pkgdiff.r-sassy.org, https://github.com/dbosak01/pkgdiff
 BugReports: https://github.com/dbosak01/pkgdiff/issues
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Depends: R (>= 4.0.0)
-Imports: rvest, common, crayon, utils, cranlogs
+Imports: rvest, common, crayon, utils, cranlogs, grDevices, graphics
 Suggests: knitr, rmarkdown, testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2025-07-12 18:51:52 UTC; dbosa
+Packaged: 2025-11-24 17:45:21 UTC; dbosa
 Author: David Bosak [aut, cre],
   Brian Varney [ctb],
   Kevin Putschko [ctb]
 Repository: CRAN
-Date/Publication: 2025-07-12 20:00:02 UTC
+Date/Publication: 2025-11-24 18:10:02 UTC

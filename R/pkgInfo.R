@@ -534,7 +534,7 @@ pkg_info <- function(pkg, ver = "current", cache = TRUE) {
     ver <- lv
   }
 
-  if (!is.null(ver)) {
+  if (!is.null(ver) && based == FALSE) {
     tmp <- get_archive_versions(pkg)
     if (archived) {
 
@@ -782,8 +782,10 @@ get_info_description <- function(pkg) {
 
     blt <- strsplit(ds$Built, ";", fixed = TRUE)[[1]][3]
 
+    blts <- parse_date(blt)
+
     ret <- pinfo(pkg, ds$Version,
-                release = as.Date(blt),
+                release = blts,
                 title = ds$Title,
                 description = ds$Description,
                 maintainer = ds$Maintainer,

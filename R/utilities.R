@@ -827,8 +827,22 @@ github_packages <- function(pkg = NULL) {
   pth <- "https://github.com/dbosak01/pkgdiffdata/raw/refs/heads/main/packages.rds"
 
   murl <- url(pth)
-  ret <- get(load(gzcon(murl)))
+  for (idx in seq(1, 10)) {
+    ret <- tryCatch({get(load(gzcon(murl)))},
+                    warning = function(cond){NULL},
+                    error = function(cond){NULL})
+    if (!is.null(ret)) {
+      break
+    }
+
+    Sys.sleep(1)
+  }
   close(murl)
+
+  if (is.null(ret)) {
+
+    stop("Pkgdiff GitHub package list not available.")
+  }
 
   if (!is.null(pkg)) {
     ret <- ret[pkg]
@@ -849,13 +863,26 @@ github_package <- function(pkg) {
 
   fl <- file.path(pth, paste0(pkg, ".RData"))
 
-  info <- tryCatch({
-      murl <- url(fl)
-      ret <- get(load(gzcon(murl)))
-      close(murl)
-      ret
-    },
-      error = function(e){NULL})
+  murl <- url(fl)
+
+  for (idx in seq(1, 10)) {
+    info <- tryCatch({get(load(gzcon(murl)))},
+                    warning = function(cond){NULL},
+                    error = function(cond){NULL})
+    if (!is.null(info)) {
+      break
+    }
+
+    Sys.sleep(1)
+  }
+
+  close(murl)
+
+  if (is.null(info)) {
+
+    stop(paste0("Pkgdiff GitHub package '", pkg, "' not available."))
+  }
+
 
   return(info)
 
@@ -867,9 +894,24 @@ github_update <- function() {
   pth <- "https://github.com/dbosak01/pkgdiffdata/raw/refs/heads/main/LastUpdate.RData"
 
   murl <- url(pth)
-  ret <- get(load(gzcon(murl)))
+  # ret <- get(load(gzcon(murl)))
+  for (idx in seq(1, 10)) {
+    ret <- tryCatch({get(load(gzcon(murl)))},
+                    warning = function(cond){NULL},
+                    error = function(cond){NULL})
+    if (!is.null(ret)) {
+      break
+    }
+
+    Sys.sleep(1)
+  }
+
   close(murl)
 
+  if (is.null(ret)) {
+
+    stop("Pkgdiff GitHub LastUpdated datestamp not available.")
+  }
 
   return(ret)
 }
@@ -951,5 +993,164 @@ unzip_package <- function(pth) {
   return(ret)
 }
 
+# Show a file in the viewer.
+# This is used in pkg_report()
+#' @noRd
+show_viewer <- function(path) {
 
+  pth <- path
+
+  #print(paste0("path: ", path))
+
+  if (interactive()) {
+
+    if (file.exists(path)) {
+
+      viewer <- getOption("viewer")
+
+      if (!is.null(viewer)) {
+        viewer(pth)
+      } else {
+        utils::browseURL(pth)
+      }
+
+    }
+
+  }
+
+
+  return(pth)
+
+}
+
+#' @noRd
+sort_data_frame <- function(x, decreasing = FALSE, ..., by = NULL,
+                            ascending = TRUE, na.last = TRUE,
+                            index.return = FALSE) {
+
+  if (!"data.frame" %in% class(x)) {
+    stop("Input object must be derived from a data frame")
+
+  }
+
+  nms <- names(x)
+  if (!all(by %in% nms)) {
+    lst <- by[!by %in% nms]
+
+    stop(paste0("By value '", lst, "' is not a column on the input data frame."))
+
+  }
+
+  # A temporary list to hold columns
+  tmp <- list()
+
+  # Store input dataset in new variable
+  df <- x
+
+  # Default by is all variable names
+  if (is.null(by))
+    by <- names(df)
+
+  # Default ascending
+  a <- rep(TRUE, length(by))
+
+  # Set ascending if supplied
+  if (!is.null(ascending)) {
+    a <- rep(ascending, length(by))
+  }
+  names(a) <- by
+
+  # Create rank columns to handle custom sorts
+  for (nm in by) {
+
+    if (a[nm] == TRUE)
+      tmp[[nm]] <- rank(df[[nm]], na.last = na.last)
+    else
+      tmp[[nm]] <- -rank(df[[nm]], na.last = na.last)
+  }
+
+  # Get modified dataframe
+  tmp <- as.data.frame(tmp, stringsAsFactors = FALSE)
+
+  # Get row order
+  ord <- do.call('order', tmp)
+
+  if (index.return) {
+    ret <- ord
+  } else {
+    # Sort input dataframe
+    ret <- df[ord, , drop = FALSE]
+
+    # Restore attributes
+    ret <- copy.attributes(x, ret)
+  }
+
+
+
+  return(ret)
+
+
+}
+
+
+
+parse_date <- function(dstrng) {
+
+  ret <- tryCatch({as.Date(dstrng)},
+                  warning = function(cond) {NULL},
+                  error = function(cond) { NULL})
+
+  if (is.null(ret) || is.na(ret)) {
+
+    # Extract timezone (last word)
+    tz <- sub(".*\\s+", "", dstrng)
+
+    # Remove timezone from the timestamp
+    ts <- sub(paste0(" ", tz, "$"), "", dstrng)
+
+    # Parse and convert to Date
+    ret <- tryCatch({as.Date(as.POSIXct(ts,
+                                        format = " %Y-%m-%d %H:%M:%S",
+                                        tz = tz))},
+                    warning = function(cond) {NULL},
+                    error = function(cond) {NULL})
+
+
+  }
+
+  if (is.null(ret) || is.na(ret)) {
+
+
+    # 1. Remove surrounding single quotes and leading/trailing spaces
+    clean <- gsub("^[' ]+|[' ]+$", "", dstrng)
+
+    # 2. Extract the numeric timezone (e.g., "-0600")
+    offset <- sub(".* ([+-][0-9]{4})$", "\\1", clean)
+
+    # 3. Convert offset to "Etc/GMT" format
+    #    (Note: Etc/GMT signs are reversed relative to offsets)
+    hours_offset <- suppressWarnings(as.integer(substr(offset, 1, 3)))  # "-06" → -6
+    tz <- suppressWarnings(sprintf("Etc/GMT%+d", -hours_offset))  # becomes "Etc/GMT+6"
+
+    # 4. Remove the offset from the datetime string
+    datetime <- sub(paste0(" ", offset, "$"), "", clean)
+
+    # 5. Parse into POSIXct using the dynamically generated timezone
+    ret <- tryCatch({as.Date(as.POSIXct(datetime,
+                     format = "%a, %d %b %Y %H:%M:%S",
+                     tz = tz))},
+                   warning = function(cond) {NULL},
+                   error = function(cond) {NULL})
+
+  }
+
+  if (is.null(ret) || is.na(ret)) {
+
+    ret <- dstrng
+  }
+
+
+  return(ret)
+
+}
 
